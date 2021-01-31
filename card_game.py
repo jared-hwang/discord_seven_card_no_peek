@@ -29,4 +29,3 @@ class Game():
 
     def clear_players(self):
         self.players.clear()
-
