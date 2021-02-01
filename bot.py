@@ -55,20 +55,19 @@ async def unseat_player(ctx, arg):
 async def new_game(ctx):
     if len(peekgame.players) == 0:
         await ctx.send("No players!")
-    peekgame.initialize_game()
-    peekgame.next_round()
-    for player in peekgame.players:
-        await ctx.send(f":arrow_down: {player} :arrow_down: ")
-        await ctx.send(f"{peekgame.player_dict[player].hand_string(peekgame.roundnum)}")
+        return
+    sendstring = peekgame.initialize_game()
+    for elem in sendstring:
+        await ctx.send(elem)
 
-@bot.command(name='nextround')
-async def next_round(ctx):
-    peekgame.next_round()
-    for player in peekgame.players:
-        await ctx.send(f":arrow_down: {player} :arrow_down: ")
-        await ctx.send(f"{peekgame.player_dict[player].hand_string(peekgame.roundnum)}")
-    if peekgame.roundnum == 7:
-        await ctx.send(peekgame.end_game())
+@bot.command(name='flipme')
+async def flipme(ctx):
+    if ctx.author.name not in peekgame.player_dict:
+        ctx.send("You're not in the game!")
+        return 
+    sendstring = peekgame.flip_player(ctx.author.name)
+    for elem in sendstring:
+        await ctx.send(elem)
 
 @bot.command(name='reset_game')
 async def reset_game(ctx):
@@ -78,5 +77,19 @@ async def reset_game(ctx):
 @bot.command(name='players')
 async def players(ctx):
     await ctx.send(f"Players: {', '.join(peekgame.players)}")
+
+@bot.command(name='riches')
+async def riches(ctx):
+    await ctx.send(f"{ctx.author.name} has {peekgame.player_dict[ctx.author.name].money} money.")
+
+@bot.command(name='bet')
+async def bet(ctx, arg):
+    peekgame.player_dict[ctx.author.name].bet(int(arg))
+    peekgame.add_to_pot(int(arg))
+
+@bot.command(name='fold')
+async def fold(ctx):
+    peekgame.fold_player(ctx.author.name)
+    await ctx.send(f"{ctx.author.name} folded.")
 
 bot.run(TOKEN)
